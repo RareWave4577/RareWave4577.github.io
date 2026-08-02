@@ -378,83 +378,6 @@
   }
 
   /* ── Load and render ───────────────────────────────────────────────────── */
-  (function initLiveCutoffCountdown() {
-  let intervalId = null;
-
-  function parseCutoffOffsetHours() {
-    const el = document.getElementById('liveCutoff');
-    const txt = el ? el.textContent : '';
-    const m = txt && txt.match(/(\d+(?:\.\d+)?)\s*hr/i);
-    return m ? parseFloat(m[1]) : 2;
-  }
-
-  function parseTimeToMinutes(txt) {
-    if (!txt) return null;
-
-    const m = txt.trim().match(/(\d{1,2}):(\d{2})\s*([AaPp][Mm])/);
-    if (!m) return null;
-
-    let hour = parseInt(m[1], 10);
-    const min = parseInt(m[2], 10);
-    const ampm = m[3].toUpperCase();
-
-    if (ampm === 'PM' && hour !== 12) hour += 12;
-    if (ampm === 'AM' && hour === 12) hour = 0;
-
-    return hour * 60 + min;
-  }
-
-  function fmtRemaining(mins) {
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-
-    if (h > 0) return `CUTOFF IN ${h}h ${m}m`;
-    return `Cutoff in ${m}m`;
-  }
-
-  function renderCountdowns() {
-
-    const offsetHours = parseCutoffOffsetHours();
-
-    const now = new Date();
-    const nowMins = now.getHours() * 60 + now.getMinutes();
-
-    document.querySelectorAll('.time-chip').forEach(chip => {
-
-      const deliveryMins = parseTimeToMinutes(chip.textContent);
-
-      if (deliveryMins === null) return;
-
-      let span = chip.parentNode.querySelector(':scope > .cutoff-countdown');
-
-      if (!span) {
-        span = document.createElement('span');
-        span.className = 'cutoff-countdown';
-        chip.insertAdjacentElement('afterend', span);
-      }
-
-      const cutoffMins = deliveryMins - Math.round(offsetHours * 60);
-      const remaining = cutoffMins - nowMins;
-
-      if (remaining <= 0) {
-        span.textContent = 'CUTOFF PASSED';
-        span.classList.add('cutoff-passed');
-      } else {
-        span.textContent = fmtRemaining(remaining);
-        span.classList.remove('cutoff-passed');
-      }
-    });
-  }
-
-  window.startLiveCountdown = function () {
-    renderCountdowns();
-
-    if (intervalId) clearInterval(intervalId);
-
-    intervalId = setInterval(renderCountdowns, 60000);
-  };
-
-})();
   function render() {
     var raw;
     try { raw = localStorage.getItem(LS_KEY); }
@@ -514,12 +437,9 @@
     if (ref && data.refFontSize) ref.style.setProperty('--ref-font-size', data.refFontSize);
 
     contentEl.appendChild(holder);
-	updatedEl.textContent = relTime(data.ts);
-	initTabs();
-
-	startLiveCountdown();
-
-	return true;
+    updatedEl.textContent = relTime(data.ts);
+    initTabs();
+    return true;
   }
 
   var ok = render();
