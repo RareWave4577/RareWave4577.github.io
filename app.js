@@ -4732,57 +4732,157 @@
   })();
 
   /* =============================================================================
-     FEATURE — WEEKEND ROUTES TOGGLE
-     Always-visible header button. When ON, hides every .timeline-row except
-     those containing a card whose .tag-freq text matches a weekend pattern
-     (SAT, SUN, SAT & SUN / WKND). Rows are hidden via CSS (display:none),
-     never deleted. State persists in localStorage under deliveryWeekendMode.
+     FEATURE — DAY FILTER (3-state cycle)
+
+     One header button cycles through:
+        all      → Weekday + Weekend (nothing hidden)
+        weekday  → only rows/cards serving MON–FRI
+        weekend  → only rows/cards serving SAT/SUN
+
+     Classification is per-card, read from the .tag-freq chips:
+        weekend  — SAT, SUN, WKND, WEEKEND
+        weekday  — MON..FRI (long or short), M/W/F style, M–F, DAILY, WKDY
+     A card with no recognisable frequency tag is treated as BOTH, so an
+     untagged card is never hidden by the filter — silently disappearing data
+     is far worse than showing one row too many.
+
+     Rows are hidden purely via CSS (display:none) and never deleted. State
+     persists in localStorage under deliveryDayFilter, with a migration from
+     the old boolean deliveryWeekendMode key.
   ============================================================================= */
-  (function initWeekendToggle() {
+  (function initDayFilterToggle() {
     const btn   = document.getElementById('weekendToggleBtn');
     const label = document.getElementById('weekendToggleLabel');
     const pill  = document.getElementById('weekendPill');
     if (!btn) return;
-    const LS_KEY_WKND = 'deliveryWeekendMode';
-    const WEEKEND_RE = /\b(SAT|SUN|WKND|WEEKEND)\b/i;
 
-    let weekendMode = localStorage.getItem(LS_KEY_WKND) === '1';
+    const LS_KEY_DAY  = 'deliveryDayFilter';
+    const LS_KEY_WKND = 'deliveryWeekendMode'; // legacy boolean
 
-    // Walk all timeline rows, tag any row containing a weekend card with
-    // .has-weekend so the CSS `.weekend-mode .timeline-row.has-weekend` rule
-    // can reveal it.
-    function markWeekendRows() {
+    const WEEKEND_RE = /\b(SAT(URDAY)?|SUN(DAY)?|WKND|WEEKEND)\b/i;
+    // Long names, 3-letter abbreviations, and the compact M/T/W/Th/F forms the
+    // Quick Reference uses. "M–F" / "M-F" and DAILY count as weekday too.
+    const WEEKDAY_RE = /(\b(MON|TUE|TUES|WED|THU|THUR|THURS|FRI)(DAY|DAYS)?\b)|(\bM\s*[–—-]\s*F\b)|(\bDAILY\b)|(\bWKDY\b)|(\bWEEKDAY?S?\b)|(\bEVERY\s*DAY\b)|((^|[^A-Z])(M|T|W|R|TH|F)(\s*\/\s*(M|T|W|R|TH|F))+([^A-Z]|$))/i;
+
+    const MODES = ['all', 'weekday', 'weekend'];
+    const META = {
+      all: {
+        label: 'All Days',
+        pill:  'WEEKDAY + WEEKEND',
+        cls:   '',
+        title: 'Showing every route — click for Weekday only'
+      },
+      weekday: {
+        label: 'Weekday View',
+        pill:  'MON – FRI',
+        cls:   'mode-weekday',
+        title: 'Showing weekday (MON–FRI) routes only — click for Weekend only'
+      },
+      weekend: {
+        label: 'Weekend View',
+        pill:  'SAT / SUN',
+        cls:   'mode-weekend',
+        title: 'Showing weekend (SAT/SUN) routes only — click to show all days'
+      }
+    };
+
+    let mode = localStorage.getItem(LS_KEY_DAY);
+    if (MODES.indexOf(mode) === -1) {
+      // Migrate the old two-state key: ON meant weekend-only, OFF meant everything.
+      mode = localStorage.getItem(LS_KEY_WKND) === '1' ? 'weekend' : 'all';
+    }
+
+    function freqTextOf(card) {
+      const tags = card.querySelectorAll('.tag-freq');
+      if (!tags.length) return '';
+      return Array.from(tags).map(t => t.textContent || '').join(' ');
+    }
+
+    /* Tag every card and every row with what days it serves. */
+    function markDays() {
       document.querySelectorAll('.timeline-row').forEach(row => {
-        const hasWeekendCard = Array.from(row.querySelectorAll('.card')).some(card =>
-          Array.from(card.querySelectorAll('.tag-freq')).some(tag => WEEKEND_RE.test(tag.textContent || ''))
-        );
-        row.classList.toggle('has-weekend', hasWeekendCard);
+        let rowWeekend = false, rowWeekday = false;
+        row.querySelectorAll('.card').forEach(card => {
+          const txt = freqTextOf(card);
+          let isWknd = WEEKEND_RE.test(txt);
+          let isWkdy = WEEKDAY_RE.test(txt);
+          if (!isWknd && !isWkdy) { isWknd = true; isWkdy = true; } // untagged → always visible
+          card.classList.toggle('day-weekend', isWknd);
+          card.classList.toggle('day-weekday', isWkdy);
+          if (isWknd) rowWeekend = true;
+          if (isWkdy) rowWeekday = true;
+        });
+        // A row with no cards at all stays visible in every mode.
+        if (!row.querySelector('.card')) { rowWeekend = true; rowWeekday = true; }
+        row.classList.toggle('has-weekend', rowWeekend);
+        row.classList.toggle('has-weekday', rowWeekday);
       });
     }
 
     function apply() {
-      markWeekendRows();
-      html.classList.toggle('weekend-mode', weekendMode);
-      btn.classList.toggle('active', weekendMode);
-      btn.setAttribute('aria-pressed', weekendMode);
-      if (pill) pill.classList.toggle('active', weekendMode);
-      if (label) label.textContent = weekendMode ? 'Weekday View' : 'Weekend View';
-      btn.title = weekendMode
-        ? 'Showing weekend (SAT/SUN) routes only — click to return to full weekday view'
-        : 'Show only weekend (SAT/SUN) routes';
+      markDays();
+      const meta = META[mode] || META.all;
+      html.classList.toggle('weekend-mode', mode === 'weekend');
+      html.classList.toggle('weekday-mode', mode === 'weekday');
+      html.dataset.dayFilter = mode;
+
+      btn.classList.toggle('active', mode !== 'all');
+      btn.classList.remove('mode-weekday', 'mode-weekend');
+      if (meta.cls) btn.classList.add(meta.cls);
+      btn.setAttribute('aria-pressed', String(mode !== 'all'));
+      btn.title = meta.title;
+      if (label) label.textContent = meta.label;
+      if (pill) {
+        pill.textContent = meta.pill;
+        pill.classList.toggle('active', mode !== 'all');
+      }
     }
 
     btn.addEventListener('click', () => {
-      weekendMode = !weekendMode;
-      localStorage.setItem(LS_KEY_WKND, weekendMode ? '1' : '0');
+      mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
+      try { localStorage.setItem(LS_KEY_DAY, mode); } catch (e) {}
       apply();
     });
 
     // Exposed so other init paths (undo/redo, import, builder generate,
     // add/duplicate row, etc.) can re-tag rows after the DOM changes.
     window._applyWeekendMode = apply;
+    window._getDayFilter = () => mode;
 
     apply();
+  })();
+
+  /* =============================================================================
+     LIVE DASHBOARD LAUNCHER
+     Moved out of the header (which had run out of room) into a floating
+     bottom-right pill. Ctrl+Shift+L opens it from anywhere, and the button can
+     be dismissed for a completely clean board — the shortcut still works.
+  ============================================================================= */
+  (function initLiveLauncher() {
+    const wrap    = document.getElementById('liveLauncher');
+    const hideBtn = document.getElementById('liveLauncherHide');
+    const LS_KEY_LAUNCH = 'deliveryLiveLauncherHidden';
+    if (!wrap) return;
+
+    if (localStorage.getItem(LS_KEY_LAUNCH) === '1') wrap.classList.add('is-hidden');
+
+    if (hideBtn) hideBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      wrap.classList.add('is-hidden');
+      try { localStorage.setItem(LS_KEY_LAUNCH, '1'); } catch (err) {}
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (!(e.ctrlKey || e.metaKey) || !e.shiftKey) return;
+      if ((e.key || '').toLowerCase() !== 'l') return;
+      e.preventDefault();
+      // Un-hide so the user can find it again after using the shortcut once.
+      wrap.classList.remove('is-hidden');
+      try { localStorage.setItem(LS_KEY_LAUNCH, '0'); } catch (err) {}
+      try { if (typeof saveNow === 'function') saveNow(true); } catch (err) {}
+      window.open('live.html', '_blank', 'noopener');
+    });
   })();
 
 

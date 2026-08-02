@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=30" />
+  <link rel="stylesheet" href="style.css?v=31" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
@@ -45,10 +45,6 @@
       </div>
 
       <nav class="header-actions" aria-label="App controls">
-        <a id="liveViewBtn" class="icon-btn live-view-btn" href="live.html" target="_blank" rel="noopener" title="Open the read-only live dashboard (saves first)" aria-label="Open live dashboard">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          <span class="live-view-label">Live</span>
-        </a>
         <div class="btn-group">
           <button id="undoBtn" class="icon-btn" disabled title="Undo (Ctrl+Z)" aria-label="Undo">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
@@ -63,11 +59,12 @@
           <span>Edit</span>
         </button>
 
-        <!-- Weekend Routes toggle -->
-        <button id="weekendToggleBtn" class="pill-btn btn-weekend" title="Show only weekend (SAT/SUN) routes" aria-pressed="false">
+        <!-- Day-filter toggle — cycles All → Weekday → Weekend -->
+        <button id="weekendToggleBtn" class="pill-btn btn-weekend" title="Day filter — click to cycle" aria-pressed="false">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span id="weekendToggleLabel">Weekend View</span>
-          <span id="weekendPill" class="weekend-pill">SAT / SUN</span>
+          <span id="weekendToggleLabel">All Days</span>
+          <span id="weekendPill" class="weekend-pill">WEEKDAY + WEEKEND</span>
+          <svg class="wknd-cycle-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-4.95"/></svg>
         </button>
 
         <!-- Search / Highlight bar -->
@@ -707,7 +704,21 @@
     <ul id="routePrintList" class="route-print-list"></ul>
   </div>
 
-  <script src="app.js?v=30l"></script>
+  <!-- ═══════════════════════════════════════════════════════════
+       LIVE DASHBOARD LAUNCHER (floating — keeps the header uncluttered)
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="live-launcher" id="liveLauncher">
+    <a id="liveViewBtn" class="live-launcher-btn" href="live.html" target="_blank" rel="noopener"
+       title="Open the read-only live dashboard in a new tab (saves first) — Ctrl+Shift+L">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span class="live-launcher-label">Live Dashboard</span>
+    </a>
+    <button id="liveLauncherHide" class="live-launcher-hide" type="button" title="Hide this button (Ctrl+Shift+L still opens it)" aria-label="Hide live dashboard button">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <script src="app.js?v=31"></script>
 <script data-pplx-inline-edit>
 (function () {
   if (window === window.top) return;

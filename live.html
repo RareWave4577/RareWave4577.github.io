@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex">
 <title>Delivery Schedule — Live</title>
 <link rel="stylesheet" href="base.css">
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="live.css">
+<link rel="stylesheet" href="style.css?v=31">
+<link rel="stylesheet" href="live.css?v=31">
 </head>
 <body class="live-body">
 
@@ -29,14 +29,77 @@
       <div class="live-header-right">
         <span class="live-cutoff" id="liveCutoff" hidden></span>
         <span class="live-badge live-live-badge"><span class="live-dot"></span>Live</span>
+
+        <button class="live-icon-btn" id="liveNowBtn" type="button" aria-label="Jump to current time" title="Jump to the current delivery slot">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+        </button>
+
         <button class="live-icon-btn" id="liveThemeBtn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         </button>
+
+        <!-- ── Dashboard options ── -->
+        <div class="live-opts-wrap">
+          <button class="live-icon-btn" id="liveOptsBtn" type="button" aria-expanded="false" aria-controls="liveOptsPanel" aria-label="Dashboard options" title="Dashboard options">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.36.4.66.74.86.29.17.62.26.95.26H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+
+          <div class="live-opts-panel" id="liveOptsPanel" hidden>
+            <div class="live-opts-title">Dashboard Options</div>
+
+            <div class="live-opt-row">
+              <span class="live-opt-label">Quick Reference</span>
+              <div class="live-opt-choices" id="optRefShow">
+                <button class="live-opt-btn" data-val="on">Show</button>
+                <button class="live-opt-btn" data-val="off">Hide</button>
+              </div>
+            </div>
+
+            <div class="live-opt-row" id="optRefPosRow">
+              <span class="live-opt-label">Placement</span>
+              <div class="live-opt-choices" id="optRefPos">
+                <button class="live-opt-btn" data-val="right">Right</button>
+                <button class="live-opt-btn" data-val="left">Left</button>
+                <button class="live-opt-btn" data-val="top">Top</button>
+                <button class="live-opt-btn" data-val="bottom">Bottom</button>
+              </div>
+              <p class="live-opt-hint">On phones the two panes always become tabs.</p>
+            </div>
+
+            <div class="live-opts-divider"></div>
+
+            <div class="live-opt-row">
+              <span class="live-opt-label">Jump to current time on load</span>
+              <div class="live-opt-choices" id="optAutoScroll">
+                <button class="live-opt-btn" data-val="on">On</button>
+                <button class="live-opt-btn" data-val="off">Off</button>
+              </div>
+            </div>
+
+            <div class="live-opt-row">
+              <span class="live-opt-label">Dim slots already past</span>
+              <div class="live-opt-choices" id="optDimPast">
+                <button class="live-opt-btn" data-val="on">On</button>
+                <button class="live-opt-btn" data-val="off">Off</button>
+              </div>
+            </div>
+
+            <div class="live-opt-row">
+              <span class="live-opt-label">Auto-refresh</span>
+              <div class="live-opt-choices" id="optRefresh">
+                <button class="live-opt-btn" data-val="0">Off</button>
+                <button class="live-opt-btn" data-val="5">5 min</button>
+                <button class="live-opt-btn" data-val="15">15 min</button>
+                <button class="live-opt-btn" data-val="60">1 hr</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <nav class="live-tabs" role="tablist">
+    <nav class="live-tabs" role="tablist" id="liveTabs">
       <button class="live-tab active" data-view="timeline" role="tab" aria-selected="true">Timeline</button>
-      <button class="live-tab" data-view="reference" role="tab" aria-selected="false">Quick Reference</button>
+      <button class="live-tab" data-view="reference" role="tab" aria-selected="false" id="liveRefTab">Quick Reference</button>
     </nav>
   </header>
 
@@ -51,7 +114,7 @@
     <span>Read-only view</span>
   </footer>
 
-  <script src="live.js"></script>
+  <script src="live.js?v=31"></script>
 <script data-pplx-inline-edit>
 (function () {
   if (window === window.top) return;

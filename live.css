@@ -149,18 +149,158 @@
 .live-status p { margin: 8px 0 0; }
 .live-status a { color: var(--accent, #2f6f6b); font-weight: 700; }
 
+/* ── Dashboard options panel ────────────────────────────────────────────── */
+.live-opts-wrap { position: relative; }
+.live-icon-btn.active { background: var(--accent, #2f6f6b); border-color: var(--accent, #2f6f6b); color: #fff; }
+
+.live-opts-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 120;
+  width: 288px;
+  max-width: calc(100vw - 24px);
+  padding: 14px 15px 15px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.18);
+}
+.live-opts-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 11px;
+}
+.live-opts-divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+.live-opt-row { margin-bottom: 12px; }
+.live-opt-row:last-child { margin-bottom: 0; }
+.live-opt-row.is-disabled { opacity: 0.4; pointer-events: none; }
+.live-opt-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-2);
+  margin-bottom: 6px;
+}
+.live-opt-choices { display: flex; gap: 4px; flex-wrap: wrap; }
+.live-opt-btn {
+  flex: 1 1 auto;
+  min-width: 52px;
+  padding: 6px 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.live-opt-btn:hover { color: var(--text-1); }
+.live-opt-btn.active {
+  background: var(--accent, #2f6f6b);
+  border-color: var(--accent, #2f6f6b);
+  color: #fff;
+}
+.live-opt-hint {
+  margin: 6px 0 0;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
+/* ── Layout: Quick Reference placement ──────────────────────────────────── */
 /* The saved markup keeps its original two-column layout on wide screens */
 .live-content .main-layout {
   display: flex;
   align-items: flex-start;
   gap: clamp(14px, 2vw, 26px);
 }
-.live-content .timeline-section { flex: 1; min-width: 0; }
+.live-content .timeline-section { flex: 1; min-width: 0; padding: 0; border-right: none; }
 .live-content .ref-section {
   position: sticky;
   top: 96px;
   max-height: calc(100vh - 120px);
   overflow-y: auto;
+  padding: 0;
+}
+
+/* Hidden entirely */
+body[data-ref="off"] .live-content .ref-section { display: none !important; }
+
+/* Side placements keep the sticky sidebar; row-reverse moves it left without
+   touching the saved DOM order, so the editor's markup stays untouched. */
+body[data-ref-pos="right"] .live-content .main-layout { flex-direction: row; }
+body[data-ref-pos="left"]  .live-content .main-layout { flex-direction: row-reverse; }
+body[data-ref-pos="left"]  .live-content .ref-section { border-left: none; border-right: 1px solid var(--border); padding-right: clamp(14px, 2vw, 26px); }
+
+/* Stacked placements: the sidebar can't be sticky or width-capped any more */
+body[data-ref-pos="top"]    .live-content .main-layout,
+body[data-ref-pos="bottom"] .live-content .main-layout { display: block; }
+body[data-ref-pos="top"]    .live-content .ref-section,
+body[data-ref-pos="bottom"] .live-content .ref-section {
+  position: static;
+  max-height: none;
+  overflow: visible;
+  width: 100% !important;
+  max-width: 100% !important;
+  border-left: none;
+  border-right: none;
+}
+body[data-ref-pos="top"] .live-content .ref-section {
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+body[data-ref-pos="bottom"] .live-content .ref-section {
+  padding-top: 18px;
+  margin-top: 18px;
+  border-top: 1px solid var(--border);
+}
+/* Source order is timeline-then-reference, so "top" needs a visual reorder */
+body[data-ref-pos="top"] .live-content .main-layout {
+  display: flex;
+  flex-direction: column;
+}
+body[data-ref-pos="top"] .live-content .ref-section      { order: 1; }
+body[data-ref-pos="top"] .live-content .timeline-section { order: 2; }
+
+/* Wide stacked layouts read better with the facility table in columns */
+@media (min-width: 1100px) {
+  body[data-ref-pos="top"] .live-content .ref-section,
+  body[data-ref-pos="bottom"] .live-content .ref-section { max-height: 46vh; overflow-y: auto; }
+}
+
+/* ── "NOW" / past-slot marking ──────────────────────────────────────────── */
+.live-content .timeline-row { scroll-margin-top: 108px; transition: opacity .18s ease; }
+
+.live-content .timeline-row.live-past-row { opacity: 0.38; }
+.live-content .timeline-row.live-past-row:hover { opacity: 0.75; }
+
+.live-content .timeline-row.live-now-row {
+  position: relative;
+  background: rgba(34, 197, 94, 0.07);
+  border-radius: 12px;
+  box-shadow: inset 3px 0 0 #16a34a;
+  opacity: 1;
+}
+[data-theme="dark"] .live-content .timeline-row.live-now-row { background: rgba(34, 197, 94, 0.12); }
+
+.live-now-badge {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  color: #fff;
+  background: #16a34a;
+  white-space: nowrap;
 }
 
 /* ── Footer ─────────────────────────────────────────────────────────────── */
@@ -194,9 +334,26 @@
   }
   .live-content .timeline-section { padding-right: 0; border-right: none; }
 
+  /* Below 900px the tabs take over regardless of the chosen placement */
+  body[data-ref-pos="right"] .live-content .main-layout,
+  body[data-ref-pos="left"]  .live-content .main-layout,
+  body[data-ref-pos="top"]   .live-content .main-layout,
+  body[data-ref-pos="bottom"] .live-content .main-layout { display: block; }
+  body[data-ref-pos="left"] .live-content .ref-section { border-right: none; padding-right: 0; }
+  body[data-ref-pos="top"] .live-content .ref-section,
+  body[data-ref-pos="bottom"] .live-content .ref-section {
+    max-height: none; margin: 0; padding-top: 0; padding-bottom: 0; border: none;
+  }
+
   /* One pane at a time */
   body[data-view="timeline"]  .live-content .ref-section      { display: none; }
   body[data-view="reference"] .live-content .timeline-section { display: none; }
+
+  /* With Quick Reference switched off there is only one pane — hide the bar */
+  body[data-ref="off"] .live-tabs { display: none; }
+
+  .live-content .timeline-row { scroll-margin-top: 132px; }
+  .live-content .timeline-row.live-now-row { padding-left: 10px !important; }
 
   /* Timeline rows stack: time label above the cards */
   .live-content .timeline-row {
@@ -268,4 +425,7 @@
 @media print {
   .live-header, .live-footer, .live-tabs { display: none !important; }
   .live-content .ref-section { position: static; max-height: none; overflow: visible; }
+  .live-content .timeline-row.live-past-row { opacity: 1 !important; }
+  .live-content .timeline-row.live-now-row { box-shadow: none; background: none; }
+  .live-now-badge { display: none !important; }
 }
