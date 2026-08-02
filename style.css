@@ -2554,10 +2554,18 @@ html.hide-cutoff-all .cutoff-countdown { display: none !important; }
 @media (max-width: 1400px) { .weekend-pill { display: none; } }
 
 /* Hide all rows in a filtered mode, then reveal only rows tagged for that mode */
-.weekend-mode .timeline-row { display: none; }
-.weekend-mode .timeline-row.has-weekend { display: flex; }
-.weekday-mode .timeline-row { display: none; }
-.weekday-mode .timeline-row.has-weekday { display: flex; }
+/* Day filter: preserve timeline grid alignment */
+.weekend-mode .timeline-row:not(.has-weekend),
+.weekday-mode .timeline-row:not(.has-weekday) {
+    display: none;
+}
+
+.weekend-mode .timeline-row.has-weekend,
+.weekday-mode .timeline-row.has-weekday {
+    display: grid;
+    grid-template-columns: var(--time-w) 32px 1fr;
+    align-items: flex-start;
+}
 
 /* Within a visible row, drop the cards that don't belong to the active filter.
    Untagged cards carry BOTH classes, so they survive every mode. */
