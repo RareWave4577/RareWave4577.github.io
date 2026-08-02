@@ -4498,8 +4498,8 @@
     function fmtRemaining(mins) {
       const h = Math.floor(mins / 60);
       const m = mins % 60;
-      if (h > 0) return `Cutoff in ${h}h ${m}m`;
-      return `Cutoff in ${m}m`;
+      if (h > 0) return `CUTOFF IN ${h}h ${m}m`;
+      return `CUTOFF IN ${m}m`;
     }
 
     function renderCountdowns() {

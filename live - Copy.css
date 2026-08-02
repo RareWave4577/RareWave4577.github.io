@@ -316,68 +316,6 @@ body[data-ref-pos="top"] .live-content .timeline-section { order: 2; }
 }
 .live-footer-sep { opacity: 0.5; }
 
-/* =============================================================================
-   FEATURE 7 — CUTOFF COUNTDOWN CLOCK
-============================================================================= */
-
-.cutoff-countdown {
-  display: inline-flex;
-  align-items: center;
-  margin-top: 4px;
-  margin-left: 8px;
-  margin-bottom: 4px;
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--text-3);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 2px 4px;
-  white-space: nowrap;
-  vertical-align: middle;
-}
-
-.cutoff-countdown.cutoff-passed {
-  color: #b91c1c;
-  align-items: center;
-  background: #fee2e2;
-  border-color: #fecaca;
-  margin-left: 8px;
-  position: static;
-  font-size: 9px;
-  font-weight: 700;
-  padding: 2px 4px;
-}
-
-[data-theme="dark"] .cutoff-countdown.cutoff-passed {
-  background: #3f1d1d;
-  border-color: #7f1d1d;
-  color: #fca5a5;
-}
-
-.edit-mode .cutoff-countdown {
-  display: none;
-}
-
-/* Prevent cutoff badges from escaping the timeline column */
-.timeline-time,
-.time-cell,
-.route-time {
-    min-width: 0;
-    overflow: hidden;
-}
-
-.time-chip {
-    max-width: 100%;
-    min-width: 0;
-    display: inline-flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-
-
 /* ===========================================================================
    MOBILE / TABLET
    Below 900px the two columns become tabbed panes so neither is squeezed.
